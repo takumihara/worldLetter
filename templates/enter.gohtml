@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Document</title>
+</head>
+<body>
+{{if .}}
+    <p>{{.}}</p>
+{{end}}
+<h1>Account Creation</h1>
+<form action="/register" method="post">
+    <label>user name</label>
+    <input type="email" name="email" />
+    <label>password</label>
+    <input type="password" name="password"/>
+    <input type="submit" />
+</form>
+<a href="/">既にアカウントを持っている</a>
+</body>
+</html>
