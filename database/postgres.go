@@ -2,6 +2,7 @@ package database
 
 import (
 	"database/sql"
+	_ "github.com/lib/pq"
 	"github.com/tacomea/worldLetter/domain"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
