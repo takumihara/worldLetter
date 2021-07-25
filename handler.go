@@ -7,7 +7,6 @@ import (
 	"github.com/tacomea/worldLetter/domain"
 	"github.com/tacomea/worldLetter/token"
 	"golang.org/x/crypto/bcrypt"
-	"html/template"
 	"log"
 	"net/http"
 	"net/url"
@@ -74,8 +73,6 @@ func (h *handler) jwtAuth(hf http.HandlerFunc) http.HandlerFunc {
 func (h *handler) indexHandler(w http.ResponseWriter, r *http.Request) {
 	msg := r.FormValue("msg")
 
-	html, err := template.ParseFiles("templates/index.gohtml")
-
 	cookie, err := r.Cookie("session")
 	if err == nil {
 		sessionId, err := token.ParseToken(cookie.Value)
@@ -86,7 +83,7 @@ func (h *handler) indexHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	err = html.Execute(w, msg)
+	err = tpl.ExecuteTemplate(w, "index.html", msg)
 	if err != nil {
 		log.Println("Error in WriteString: ", err)
 	}
@@ -95,16 +92,7 @@ func (h *handler) indexHandler(w http.ResponseWriter, r *http.Request) {
 func (h *handler) enterHandler(w http.ResponseWriter, r *http.Request) {
 	msg := r.FormValue("msg")
 
-	html, err := template.ParseFiles("templates/enter.gohtml")
-	if err != nil {
-		_, err := w.Write([]byte("500: internal server error"))
-		if err != nil {
-			log.Println("Error in WriteString: ", err)
-		}
-		return
-	}
-
-	err = html.Execute(w, msg)
+	err := tpl.ExecuteTemplate(w, "", msg)
 	if err != nil {
 		log.Println("Error in WriteString: ", err)
 	}
