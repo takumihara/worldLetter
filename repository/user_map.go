@@ -3,8 +3,8 @@ package repository
 import (
 	"errors"
 	"fmt"
+	"github.com/tacomea/worldLetter/domain"
 	"sync"
-	"user-auth/domain"
 )
 
 type userRepository struct {
@@ -28,7 +28,7 @@ func (u *userRepository) Delete(email string) error {
 	return nil
 }
 
-func (u *userRepository) Check(email string) (domain.User, error) {
+func (u *userRepository) Read(email string) (domain.User, error) {
 	value, ok := u.m.Load(email)
 	fmt.Println(value)
 	fmt.Println(ok)

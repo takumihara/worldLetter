@@ -5,6 +5,6 @@ services:
     ports:
       - 8080:8080
     volumes:
-      - .:/go/src/user-auth/
+      - .:/app
     command: >
       sh -c "reflex -s -r '\.go$$' go run main.go handler.go"
