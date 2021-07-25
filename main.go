@@ -28,6 +28,7 @@ func main() {
 
 	h := newHandler(uu, su)
 	http.HandleFunc("/", h.indexHandler)
+	http.Handle("/favicon.ico", http.NotFoundHandler())
 	http.HandleFunc("/enter", h.enterHandler)
 	http.HandleFunc("/logout", h.logoutHandler)
 	http.HandleFunc("/register", h.registerHandler)

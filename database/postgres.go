@@ -5,6 +5,7 @@ import (
 	"github.com/tacomea/worldLetter/domain"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"log"
 	"os"
 )
 
@@ -13,9 +14,13 @@ func NewPostgresDB() *gorm.DB {
 	//max := getMaxConnection()
 
 	sqlDB, err := sql.Open("postgres", url)
+	if err != nil {
+		log.Fatalln(err)
+	}
 	connection, err := gorm.Open(postgres.New(postgres.Config{
 		Conn: sqlDB,
 	}), &gorm.Config{})
+
 	if err != nil {
 		panic(err)
 	}
