@@ -1,5 +1,6 @@
 module github.com/tacomea/worldLetter
 
+// +heroku goVersion go1.15
 go 1.16
 
 require (
