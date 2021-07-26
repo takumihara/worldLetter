@@ -15,12 +15,14 @@ import (
 type handler struct {
 	userUseCase    domain.UserUseCase
 	sessionUseCase domain.SessionUseCase
+	letterUseCase  domain.LetterUseCase
 }
 
-func newHandler(uu domain.UserUseCase, su domain.SessionUseCase) *handler {
+func newHandler(uu domain.UserUseCase, su domain.SessionUseCase, lu domain.LetterUseCase) *handler {
 	return &handler{
 		userUseCase:    uu,
 		sessionUseCase: su,
+		letterUseCase:  lu,
 	}
 }
 
@@ -32,7 +34,7 @@ func (h *handler) jwtAuth(hf http.HandlerFunc) http.HandlerFunc {
 
 			sessionId, err := token.ParseToken(cookie.Value)
 			if err != nil {
-
+				log.Println(err)
 				cookie.MaxAge = -1
 				http.SetCookie(w, cookie)
 
@@ -41,13 +43,13 @@ func (h *handler) jwtAuth(hf http.HandlerFunc) http.HandlerFunc {
 					log.Println("session was not deleted: ", err)
 				}
 
-				http.Redirect(w, r, "/auth", http.StatusSeeOther)
+				http.Redirect(w, r, "/", http.StatusSeeOther)
 				return
 			}
 
-			value, err := h.sessionUseCase.Read(cookie.Value)
+			value, err := h.sessionUseCase.Read(sessionId)
 			if err != nil {
-
+				log.Println(err)
 				cookie.MaxAge = -1
 				http.SetCookie(w, cookie)
 
@@ -56,7 +58,7 @@ func (h *handler) jwtAuth(hf http.HandlerFunc) http.HandlerFunc {
 					log.Println("session was not deleted: ", err)
 				}
 
-				http.Redirect(w, r, "/auth", http.StatusSeeOther)
+				http.Redirect(w, r, "/", http.StatusSeeOther)
 				return
 			}
 
@@ -65,7 +67,8 @@ func (h *handler) jwtAuth(hf http.HandlerFunc) http.HandlerFunc {
 			hf.ServeHTTP(w, r)
 
 		} else {
-			http.Redirect(w, r, "/auth", http.StatusSeeOther)
+			log.Println(err)
+			http.Redirect(w, r, "/", http.StatusSeeOther)
 		}
 	}
 }
@@ -78,7 +81,7 @@ func (h *handler) indexHandler(w http.ResponseWriter, r *http.Request) {
 		sessionId, err := token.ParseToken(cookie.Value)
 		if err != nil {
 			log.Println("cookie modified")
-		} else if session, err := h.sessionUseCase.Read(sessionId); err == nil{
+		} else if session, err := h.sessionUseCase.Read(sessionId); err == nil {
 			msg = "Your Email: " + session.Email
 		}
 	}
@@ -92,18 +95,13 @@ func (h *handler) indexHandler(w http.ResponseWriter, r *http.Request) {
 func (h *handler) enterHandler(w http.ResponseWriter, r *http.Request) {
 	msg := r.FormValue("msg")
 
-	err := tpl.ExecuteTemplate(w, "", msg)
+	err := tpl.ExecuteTemplate(w, "enter.html", msg)
 	if err != nil {
 		log.Println("Error in WriteString: ", err)
 	}
 }
 
 func (h *handler) logoutHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Redirect(w, r, "/", http.StatusSeeOther)
-		return
-	}
-
 	cookie, err := r.Cookie("session")
 	if err != nil {
 		query := url.QueryEscape("You cannot when you are not logged in")
@@ -130,11 +128,6 @@ func (h *handler) logoutHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *handler) registerHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Redirect(w, r, "/", http.StatusSeeOther)
-		return
-	}
-
 	email := r.FormValue("email")
 	password := r.FormValue("password")
 
@@ -153,13 +146,7 @@ func (h *handler) registerHandler(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/?msg="+query, http.StatusSeeOther)
 }
 
-
 func (h *handler) loginHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Redirect(w, r, "/", http.StatusSeeOther)
-		return
-	}
-
 	email := r.FormValue("email")
 	password := r.FormValue("password")
 
@@ -192,9 +179,73 @@ func (h *handler) loginHandler(w http.ResponseWriter, r *http.Request) {
 		cookie := http.Cookie{
 			Name:  "session",
 			Value: t,
+			Path:  "/",
 		}
 		http.SetCookie(w, &cookie)
 		query := url.QueryEscape("logged in")
 		http.Redirect(w, r, "/?msg="+query, http.StatusSeeOther)
+	}
+}
+
+func (h *handler) createHandler(w http.ResponseWriter, r *http.Request) {
+	err := tpl.ExecuteTemplate(w, "create.html", nil)
+	if err != nil {
+		log.Println(err)
+	}
+}
+
+func (h *handler) sendHandler(w http.ResponseWriter, r *http.Request) {
+	content := r.FormValue("letter")
+	id := uuid.NewString()
+	email := context.Get(r, "email").(string)
+	encodedEmail := base64.StdEncoding.EncodeToString([]byte(email))
+
+	letter := domain.Letter{
+		ID:      id,
+		AuthorID: encodedEmail,
+		Content: content,
+		IsSent:  false,
+	}
+
+	err := h.letterUseCase.Create(letter)
+	if err != nil {
+		log.Println(err)
+		query := url.QueryEscape("sorry, internal server error")
+		http.Redirect(w, r, "/?msg="+query, http.StatusSeeOther)
+		return
+	}
+
+
+	user, err := h.userUseCase.Read(encodedEmail)
+	if err != nil {
+		log.Println(err)
+		query := url.QueryEscape("sorry, internal server error")
+		http.Redirect(w, r, "/?msg="+query, http.StatusSeeOther)
+		return
+	}
+	user.LetterIDs = append(user.LetterIDs, id)
+	err = h.userUseCase.Update(user)
+	if err != nil {
+		log.Println(err)
+		query := url.QueryEscape("sorry, internal server error")
+		http.Redirect(w, r, "/?msg="+query, http.StatusSeeOther)
+		return
+	}
+
+	http.Redirect(w, r, "/show", http.StatusSeeOther)
+}
+
+func (h *handler) showHandler(w http.ResponseWriter, r *http.Request) {
+	email := context.Get(r, "email").(string)
+	encodedEmail := base64.StdEncoding.EncodeToString([]byte(email))
+
+	letter, err := h.letterUseCase.ShowUnsendRandomLetter(encodedEmail)
+	if err != nil || letter.Content == "" {
+		log.Println(err)
+		letter.Content = "sorry, letter was not retrieved"
+	}
+	err = tpl.ExecuteTemplate(w, "show.html", letter.Content)
+	if err != nil {
+		log.Println(err)
 	}
 }

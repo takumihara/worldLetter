@@ -31,6 +31,7 @@ func NewPostgresDB() *gorm.DB {
 
 	connection.AutoMigrate(&domain.User{})
 	connection.AutoMigrate(&domain.Session{})
+	connection.AutoMigrate(&domain.Letter{})
 
 	return connection
 }

@@ -22,7 +22,7 @@ func CreateToken(sessionId string) (string, error) {
 	claims := CustomClaims{
 		sessionId,
 		jwt.StandardClaims{
-			ExpiresAt: time.Now().Add(time.Minute).Unix(),
+			ExpiresAt: time.Now().Add(time.Hour).Unix(),
 		},
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)

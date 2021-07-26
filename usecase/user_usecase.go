@@ -20,18 +20,26 @@ func (u *userUsecase) Create(user domain.User) error {
 	return nil
 }
 
-func (u *userUsecase) Delete(email string) error {
-	err := u.userRepo.Delete(email)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
 func (u *userUsecase) Read(email string) (domain.User, error) {
 	user, err := u.userRepo.Read(email)
 	if err != nil {
 		return domain.User{}, err
 	}
 	return user, nil
+}
+
+func (u *userUsecase) Update(user domain.User) error {
+	err := u.userRepo.Update(user)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (u *userUsecase) Delete(email string) error {
+	err := u.userRepo.Delete(email)
+	if err != nil {
+		return err
+	}
+	return nil
 }

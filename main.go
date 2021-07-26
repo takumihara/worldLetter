@@ -2,7 +2,6 @@ package main
 
 import (
 	"github.com/gorilla/mux"
-	"github.com/tacomea/worldLetter/database"
 	"github.com/tacomea/worldLetter/repository"
 	"github.com/tacomea/worldLetter/usecase"
 	"html/template"
@@ -20,24 +19,28 @@ func init() {
 
 func main() {
 	// Postgres
-	db := database.NewPostgresDB()
-	ur := repository.NewUserRepositoryMySQL(db)
-	sr := repository.NewSessionRepositoryMySQL(db)
+	//db := database.NewPostgresDB()
+	//ur := repository.NewLetterRepositoryPG(db)
+	//sr := repository.NewLetterRepositoryPG(db)
+	//lr := repository.NewLetterRepositoryPG(db)
 
 	// sync.Map
-	//ur := repository.NewSyncMapUserRepository()
-	//sr := repository.NewSyncMapSessionRepository()
+	ur := repository.NewSyncMapUserRepository()
+	sr := repository.NewSyncMapSessionRepository()
+	lr := repository.NewSyncMapLetterRepository()
 
 	uu := usecase.NewUserUsecase(ur)
 	su := usecase.NewSessionUsecase(sr)
+	lu := usecase.NewLetterUsecase(lr)
 
 	// handlers
-	h := newHandler(uu, su)
+	h := newHandler(uu, su, lu)
 	r := mux.NewRouter()
 
 	//private routes
-	//r.HandleFunc("/", h.jwtAuth(h.indexHandler)).Methods("GET")
-	//r.HandleFunc("/edit", h.jwtAuth(h.editHandler)).Methods("GET")
+	r.HandleFunc("/create", h.jwtAuth(h.createHandler)).Methods("GET")
+	r.HandleFunc("/send", h.jwtAuth(h.sendHandler)).Methods("POST")
+	r.HandleFunc("/show", h.jwtAuth(h.showHandler)).Methods("GET")
 	//r.HandleFunc("/submit", h.jwtAuth(h.submitHandler)).Methods("POST")
 
 	// public routes
