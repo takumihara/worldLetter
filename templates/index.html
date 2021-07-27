@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="ja">
+<head>
+    <meta charset="utf-8">
+    <title>World Lettering</title>
+</head>
+<body>
+{{if .}}
+<p>{{.}}</p>
+{{end}}
+<form action="/logout" method="POST">
+    <input type="submit" value="logout">
+</form>
+<div>
+    <a href="/signin">Login</a>
+</div>
+<div>
+    <a href="/signup">Create a new account</a>
+</div>
+<div>
+    <a href="/create">Write and Receive a Letter</a>
+</div>
+<div>
+    <h1>Description</h1>
+    <p>This is service where you can communicate with someone unknown from somewhere is this world. By writing one letter, you can receive one leter in return.</p>
+</div>
+</body>
+</html>

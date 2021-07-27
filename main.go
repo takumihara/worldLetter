@@ -39,6 +39,7 @@ func main() {
 	r := mux.NewRouter()
 
 	//private routes
+	r.HandleFunc("/", h.jwtAuth(h.indexHandler)).Methods("GET")
 	r.HandleFunc("/create", h.jwtAuth(h.createHandler)).Methods("GET")
 	r.HandleFunc("/send", h.jwtAuth(h.sendHandler)).Methods("POST")
 	r.HandleFunc("/show", h.jwtAuth(h.showHandler)).Methods("GET")

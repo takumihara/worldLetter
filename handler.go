@@ -58,7 +58,7 @@ func (h *handler) jwtAuth(hf http.HandlerFunc) http.HandlerFunc {
 					log.Println("session was not deleted: ", err)
 				}
 
-				http.Redirect(w, r, "/", http.StatusSeeOther)
+				http.Redirect(w, r, "/signin", http.StatusSeeOther)
 				return
 			}
 
@@ -68,8 +68,15 @@ func (h *handler) jwtAuth(hf http.HandlerFunc) http.HandlerFunc {
 
 		} else {
 			log.Println(err)
-			http.Redirect(w, r, "/", http.StatusSeeOther)
+			http.Redirect(w, r, "/signin", http.StatusSeeOther)
 		}
+	}
+}
+
+func (h *handler) indexHandler(w http.ResponseWriter, r *http.Request) {
+	err := tpl.ExecuteTemplate(w, "index.html", nil)
+	if err != nil {
+		log.Println(err)
 	}
 }
 
@@ -95,7 +102,7 @@ func (h *handler) signinHandler(w http.ResponseWriter, r *http.Request) {
 func (h *handler) signupHandler(w http.ResponseWriter, r *http.Request) {
 	msg := r.FormValue("msg")
 
-	err := tpl.ExecuteTemplate(w, "enter.html", msg)
+	err := tpl.ExecuteTemplate(w, "signup.html", msg)
 	if err != nil {
 		log.Println("Error in WriteString: ", err)
 	}
@@ -105,14 +112,14 @@ func (h *handler) logoutHandler(w http.ResponseWriter, r *http.Request) {
 	cookie, err := r.Cookie("session")
 	if err != nil {
 		query := url.QueryEscape("You cannot when you are not logged in")
-		http.Redirect(w, r, "/?msg="+query, http.StatusSeeOther)
+		http.Redirect(w, r, "/signin?msg="+query, http.StatusSeeOther)
 		return
 	}
 
 	sessionId, err := token.ParseToken(cookie.Value)
 	if err != nil {
 		query := url.QueryEscape("Logout: Cookie Modified")
-		http.Redirect(w, r, "/?msg="+query, http.StatusSeeOther)
+		http.Redirect(w, r, "/signin?msg="+query, http.StatusSeeOther)
 		return
 	}
 
@@ -124,7 +131,7 @@ func (h *handler) logoutHandler(w http.ResponseWriter, r *http.Request) {
 	cookie.MaxAge = -1
 	http.SetCookie(w, cookie)
 	query := url.QueryEscape("successfully logged out")
-	http.Redirect(w, r, "/?msg="+query, http.StatusSeeOther)
+	http.Redirect(w, r, "/signin?msg="+query, http.StatusSeeOther)
 }
 
 func (h *handler) registerHandler(w http.ResponseWriter, r *http.Request) {
@@ -143,7 +150,7 @@ func (h *handler) registerHandler(w http.ResponseWriter, r *http.Request) {
 	})
 
 	query := url.QueryEscape("account successfully created")
-	http.Redirect(w, r, "/?msg="+query, http.StatusSeeOther)
+	http.Redirect(w, r, "/singin?msg="+query, http.StatusSeeOther)
 }
 
 func (h *handler) loginHandler(w http.ResponseWriter, r *http.Request) {
@@ -155,14 +162,14 @@ func (h *handler) loginHandler(w http.ResponseWriter, r *http.Request) {
 	user, err := h.userUseCase.Read(encodedEmail)
 	if err != nil {
 		query := url.QueryEscape("username doesn't exist")
-		http.Redirect(w, r, "/?msg="+query, http.StatusSeeOther)
+		http.Redirect(w, r, "/signin?msg="+query, http.StatusSeeOther)
 		return
 	}
 	hashedPassword := user.Password
 	err = bcrypt.CompareHashAndPassword(hashedPassword, []byte(password))
 	if err != nil {
 		query := url.QueryEscape("login failed")
-		http.Redirect(w, r, "/?msg="+query, http.StatusSeeOther)
+		http.Redirect(w, r, "/signin?msg="+query, http.StatusSeeOther)
 	} else {
 		sessionId := uuid.NewString()
 		err := h.sessionUseCase.Create(domain.Session{
@@ -173,7 +180,7 @@ func (h *handler) loginHandler(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			log.Println("Error in createToken(): ", err)
 			query := url.QueryEscape("Server Error, Try Again")
-			http.Redirect(w, r, "/?msg="+query, http.StatusInternalServerError)
+			http.Redirect(w, r, "/signin?msg="+query, http.StatusInternalServerError)
 			return
 		}
 		cookie := http.Cookie{
