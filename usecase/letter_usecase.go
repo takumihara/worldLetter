@@ -44,8 +44,8 @@ func (u *letterUsecase) Delete(id string) error {
 	return nil
 }
 
-func (u *letterUsecase) ShowUnsendRandomLetter(authorID string) (domain.Letter, error) {
-	letter, err := u.letterRepo.ShowUnsendRandomLetter(authorID)
+func (u *letterUsecase) GetFirstUnsendLetter(authorID string) (domain.Letter, error) {
+	letter, err := u.letterRepo.GetFirstUnsendLetter(authorID)
 	if err != nil {
 		return domain.Letter{}, err
 	}

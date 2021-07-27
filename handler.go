@@ -239,7 +239,7 @@ func (h *handler) showHandler(w http.ResponseWriter, r *http.Request) {
 	email := context.Get(r, "email").(string)
 	encodedEmail := base64.StdEncoding.EncodeToString([]byte(email))
 
-	letter, err := h.letterUseCase.ShowUnsendRandomLetter(encodedEmail)
+	letter, err := h.letterUseCase.GetFirstUnsendLetter(encodedEmail)
 	if err != nil || letter.Content == "" {
 		log.Println(err)
 		letter.Content = "sorry, letter was not retrieved"
