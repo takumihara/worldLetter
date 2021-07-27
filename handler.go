@@ -150,7 +150,7 @@ func (h *handler) registerHandler(w http.ResponseWriter, r *http.Request) {
 	})
 
 	query := url.QueryEscape("account successfully created")
-	http.Redirect(w, r, "/singin?msg="+query, http.StatusSeeOther)
+	http.Redirect(w, r, "/signin?msg="+query, http.StatusSeeOther)
 }
 
 func (h *handler) loginHandler(w http.ResponseWriter, r *http.Request) {
