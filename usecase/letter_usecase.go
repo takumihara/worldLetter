@@ -13,43 +13,27 @@ func NewLetterUsecase(lr domain.LetterRepository) domain.LetterUseCase {
 }
 
 func (u *letterUsecase) Create(letter domain.Letter) error {
-	err := u.letterRepo.Create(letter)
-	if err != nil {
-		return err
-	}
-	return nil
+	return u.letterRepo.Create(letter)
 }
 
 func (u *letterUsecase) Read(id string) (domain.Letter, error) {
-	user, err := u.letterRepo.Read(id)
-	if err != nil {
-		return domain.Letter{}, err
-	}
-	return user, nil
+	return u.letterRepo.Read(id)
 }
 
 func (u *letterUsecase) Update(letter domain.Letter) error {
-	err := u.letterRepo.Update(letter)
-	if err != nil {
-		return err
-	}
-	return nil
+	return u.letterRepo.Update(letter)
 }
 
 func (u *letterUsecase) Delete(id string) error {
-	err := u.letterRepo.Delete(id)
-	if err != nil {
-		return err
-	}
-	return nil
+	return u.letterRepo.Delete(id)
+}
+
+func (u *letterUsecase) GetAll() ([]domain.Letter, error) {
+	return u.letterRepo.GetAll()
 }
 
 func (u *letterUsecase) GetFirstUnsendLetter(authorID string) (domain.Letter, error) {
-	letter, err := u.letterRepo.GetFirstUnsendLetter(authorID)
-	if err != nil {
-		return domain.Letter{}, err
-	}
-	return letter, nil
+	return u.letterRepo.GetFirstUnsendLetter(authorID)
 }
 
 func (u *letterUsecase) GetLettersByAuthorID(authorID string) (string, error) {
@@ -57,5 +41,5 @@ func (u *letterUsecase) GetLettersByAuthorID(authorID string) (string, error) {
 }
 
 func (u *letterUsecase) GetLettersByReceiverID(receiverID string) (string, error) {
-	return u.letterRepo.GetLettersByAuthorID(receiverID)
+	return u.letterRepo.GetLettersByReceiverID(receiverID)
 }

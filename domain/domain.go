@@ -49,6 +49,7 @@ type LetterUseCase interface {
 	Read(id string) (Letter, error)
 	Update(letter Letter) error
 	Delete(id string) error
+	GetAll() ([]Letter, error)
 	GetFirstUnsendLetter(authorID string) (Letter, error)
 	GetLettersByAuthorID(authorID string) (string, error)
 	GetLettersByReceiverID(receiverID string) (string, error)
@@ -59,6 +60,7 @@ type LetterRepository interface {
 	Read(id string) (Letter, error)
 	Update(letter Letter) error
 	Delete(id string) error
+	GetAll() ([]Letter, error)
 	GetFirstUnsendLetter(authorID string) (Letter, error)
 	GetLettersByAuthorID(authorID string) (string, error)
 	GetLettersByReceiverID(receiverID string) (string, error)

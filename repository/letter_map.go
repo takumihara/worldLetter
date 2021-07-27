@@ -54,6 +54,17 @@ func (l *letterRepository) GetFirstUnsendLetter(authorID string) (domain.Letter,
 	return letter, nil
 }
 
+func (l *letterRepository) GetAll() ([]domain.Letter, error) {
+	var letters []domain.Letter
+
+	l.m.Range(func(key interface{}, value interface{}) bool {
+		letters = append(letters, value.(domain.Letter))
+		return true
+	})
+
+	return letters, nil
+}
+
 func (l *letterRepository) GetLettersByAuthorID(authorID string) (string, error) {
 	var str string
 	l.m.Range(func(key interface{}, value interface{}) bool {

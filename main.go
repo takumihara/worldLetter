@@ -44,6 +44,7 @@ func main() {
 	r.HandleFunc("/show", h.jwtAuth(h.showHandler)).Methods("GET")
 	r.HandleFunc("/letter/received", h.jwtAuth(h.letterReceivedHandler)).Methods("GET")
 	r.HandleFunc("/letter/sent", h.jwtAuth(h.letterSentHandler)).Methods("GET")
+	r.HandleFunc("/admin", h.jwtAuth(h.adminHandler)).Methods("GET")
 
 	// public routes
 	r.HandleFunc("/signin", h.signinHandler).Methods("GET")

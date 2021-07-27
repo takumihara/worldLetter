@@ -247,8 +247,9 @@ func (h *handler) showHandler(w http.ResponseWriter, r *http.Request) {
 	encodedEmail := base64.StdEncoding.EncodeToString([]byte(email))
 
 	letter, err := h.letterUseCase.GetFirstUnsendLetter(encodedEmail)
-	if err != nil || letter.Content == "" {
+	if err != nil {
 		log.Println(err)
+	} else if letter.Content == "" {
 		letter.Content = "sorry, letter was not retrieved. Your letter might be out first one!"
 	} else {
 		letter.IsSent = true
@@ -331,5 +332,19 @@ func (h *handler) letterReceivedHandler(w http.ResponseWriter, r *http.Request) 
 	err = tpl.ExecuteTemplate(w, "letterReceived.html", contents)
 	if err != nil {
 		log.Println(err)
+	}
+}
+
+func (h *handler) adminHandler(w http.ResponseWriter, r *http.Request) {
+	letters, err := h.letterUseCase.GetAll()
+	if err != nil {
+		log.Println(err)
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
+
+	err = tpl.ExecuteTemplate(w, "admin.html", letters)
+	if err != nil {
+		log.Println("Error in WriteString: ", err)
 	}
 }

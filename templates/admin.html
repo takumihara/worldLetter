@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Document</title>
+</head>
+<body>
+<h3>Information of every letter</h3>
+<div>
+    {{range $index, $content := .}}
+    <div>
+        <h3>Number: {{$index}}</h3>
+        <p>ID: {{$content.ID}}</p>
+        <p>AuthorID: {{$content.AuthorID}}</p>
+        <p>ReceiverID: {{$content.ReceiverID}}</p>
+        <p>Content: {{$content.Content}}</p>
+        <p>IsSent: {{$content.IsSent}}</p>
+    </div>
+    {{end}}
+</div>
+</body>
+</html>
