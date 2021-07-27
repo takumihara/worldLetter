@@ -230,7 +230,7 @@ func (h *handler) sendHandler(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/?msg="+query, http.StatusSeeOther)
 		return
 	}
-	user.LetterIDs = append(user.LetterIDs, id)
+	user.LetterIDs = user.LetterIDs + id
 	err = h.userUseCase.Update(user)
 	if err != nil {
 		log.Println(err)
