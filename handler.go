@@ -43,7 +43,7 @@ func (h *handler) jwtAuth(hf http.HandlerFunc) http.HandlerFunc {
 					log.Println("session was not deleted: ", err)
 				}
 
-				http.Redirect(w, r, "/", http.StatusSeeOther)
+				http.Redirect(w, r, "/signin", http.StatusSeeOther)
 				return
 			}
 
@@ -73,7 +73,7 @@ func (h *handler) jwtAuth(hf http.HandlerFunc) http.HandlerFunc {
 	}
 }
 
-func (h *handler) indexHandler(w http.ResponseWriter, r *http.Request) {
+func (h *handler) signinHandler(w http.ResponseWriter, r *http.Request) {
 	msg := r.FormValue("msg")
 
 	cookie, err := r.Cookie("session")
@@ -86,13 +86,13 @@ func (h *handler) indexHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	err = tpl.ExecuteTemplate(w, "index.html", msg)
+	err = tpl.ExecuteTemplate(w, "signin.html", msg)
 	if err != nil {
 		log.Println("Error in WriteString: ", err)
 	}
 }
 
-func (h *handler) enterHandler(w http.ResponseWriter, r *http.Request) {
+func (h *handler) signupHandler(w http.ResponseWriter, r *http.Request) {
 	msg := r.FormValue("msg")
 
 	err := tpl.ExecuteTemplate(w, "enter.html", msg)

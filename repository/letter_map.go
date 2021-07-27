@@ -3,7 +3,6 @@ package repository
 import (
 	"errors"
 	"github.com/tacomea/worldLetter/domain"
-	"log"
 	"sync"
 )
 
@@ -41,17 +40,15 @@ func (s *letterRepository) Delete(id string) error {
 	return nil
 }
 
-func (s *letterRepository) 	ShowUnsendRandomLetter(AuthorID string) (domain.Letter, error) {
+func (s *letterRepository) 	GetFirstUnsendLetter(AuthorID string) (domain.Letter, error) {
 	var letter domain.Letter
 	s.m.Range(func(key interface{}, value interface{}) bool {
 		val := value.(domain.Letter)
 		if val.IsSent == false && val.AuthorID != AuthorID{
 			letter = val
-			log.Println("letter was found!")
 			return false
 		}
 		return true
 	})
-	log.Println(letter)
 	return letter, nil
 }

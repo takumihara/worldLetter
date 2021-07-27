@@ -2,6 +2,7 @@ package database
 
 import (
 	"database/sql"
+	"fmt"
 	_ "github.com/lib/pq"
 	"github.com/tacomea/worldLetter/domain"
 	"gorm.io/driver/postgres"
@@ -39,7 +40,10 @@ func NewPostgresDB() *gorm.DB {
 func getDatabaseUrl() string {
 	url := os.Getenv("DATABASE_URL")
 	if url == "" {
-		panic("Environment variable 'DATABASE_URL' not defined")
+		//panic("Environment variable 'DATABASE_URL' not defined")
+		url = fmt.Sprintf("postgres://pg-user:password@localhost:5433/world-letter?sslmode=disable")
+		log.Println("since environment variable 'DATABASE_URL' not defined, we'll run postgres locally")
+		//url = "user=pg-user dbname=world-letter password=password sslmode=disable port=5433 host=localhost"
 	}
 
 	return url

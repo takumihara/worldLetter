@@ -49,7 +49,7 @@ type LetterUseCase interface {
 	Read(id string) (Letter, error)
 	Update(letter Letter) error
 	Delete(id string) error
-	ShowUnsendRandomLetter(AuthorID string) (Letter, error)
+	GetFirstUnsendLetter(AuthorID string) (Letter, error)
 }
 
 type LetterRepository interface {
@@ -57,5 +57,5 @@ type LetterRepository interface {
 	Read(id string) (Letter, error)
 	Update(letter Letter) error
 	Delete(id string) error
-	ShowUnsendRandomLetter(AuthorID string) (Letter, error)
+	GetFirstUnsendLetter(AuthorID string) (Letter, error)
 }

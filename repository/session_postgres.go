@@ -6,17 +6,17 @@ import (
 	"gorm.io/gorm"
 )
 
-type sessionRepositoryMySQL struct {
+type sessionRepositoryPG struct {
 	db *gorm.DB
 }
 
-func NewSessionRepositoryMySQL(db *gorm.DB) domain.SessionRepository{
-	return &sessionRepositoryMySQL{
+func NewSessionRepositoryPG(db *gorm.DB) domain.SessionRepository{
+	return &sessionRepositoryPG{
 		db: db,
 	}
 }
 
-func (s *sessionRepositoryMySQL) Create(session domain.Session) error {
+func (s *sessionRepositoryPG) Create(session domain.Session) error {
 	result := s.db.Create(session)
 	if result.Error != nil {
 		return errors.New("unexpected error while storing session")
@@ -24,7 +24,7 @@ func (s *sessionRepositoryMySQL) Create(session domain.Session) error {
 	return nil
 }
 
-func (s *sessionRepositoryMySQL) Delete(id string) error {
+func (s *sessionRepositoryPG) Delete(id string) error {
 	result := s.db.Delete(&domain.Session{}, id)
 	if result.Error != nil {
 		return errors.New("unexpected error while deleting session")
@@ -32,7 +32,7 @@ func (s *sessionRepositoryMySQL) Delete(id string) error {
 	return nil
 }
 
-func (s *sessionRepositoryMySQL) Read(id string) (domain.Session, error) {
+func (s *sessionRepositoryPG) Read(id string) (domain.Session, error) {
 	var session domain.Session
 	result := s.db.First(&session, "id = ?", id)
 	if result.Error != nil {

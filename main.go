@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/gorilla/mux"
+	"github.com/tacomea/worldLetter/database"
 	"github.com/tacomea/worldLetter/repository"
 	"github.com/tacomea/worldLetter/usecase"
 	"html/template"
@@ -19,15 +20,15 @@ func init() {
 
 func main() {
 	// Postgres
-	//db := database.NewPostgresDB()
-	//ur := repository.NewLetterRepositoryPG(db)
-	//sr := repository.NewLetterRepositoryPG(db)
-	//lr := repository.NewLetterRepositoryPG(db)
+	db := database.NewPostgresDB()
+	ur := repository.NewUserRepositoryPG(db)
+	sr := repository.NewSessionRepositoryPG(db)
+	lr := repository.NewLetterRepositoryPG(db)
 
 	// sync.Map
-	ur := repository.NewSyncMapUserRepository()
-	sr := repository.NewSyncMapSessionRepository()
-	lr := repository.NewSyncMapLetterRepository()
+	//ur := repository.NewSyncMapUserRepository()
+	//sr := repository.NewSyncMapSessionRepository()
+	//lr := repository.NewSyncMapLetterRepository()
 
 	uu := usecase.NewUserUsecase(ur)
 	su := usecase.NewSessionUsecase(sr)
@@ -44,8 +45,8 @@ func main() {
 	//r.HandleFunc("/submit", h.jwtAuth(h.submitHandler)).Methods("POST")
 
 	// public routes
-	r.HandleFunc("/", h.indexHandler).Methods("GET")
-	r.HandleFunc("/enter", h.enterHandler).Methods("GET")
+	r.HandleFunc("/signin", h.signinHandler).Methods("GET")
+	r.HandleFunc("/signup", h.signupHandler).Methods("GET")
 	r.HandleFunc("/register", h.registerHandler).Methods("POST")
 	r.HandleFunc("/login", h.loginHandler).Methods("POST")
 	r.HandleFunc("/logout", h.logoutHandler).Methods("POST")

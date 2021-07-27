@@ -6,17 +6,17 @@ import (
 	"gorm.io/gorm"
 )
 
-type userRepositoryMySQL struct {
+type userRepositoryPG struct {
 	db *gorm.DB
 }
 
-func NewUserRepositoryMySQL(db *gorm.DB) domain.UserRepository {
-	return &userRepositoryMySQL{
+func NewUserRepositoryPG(db *gorm.DB) domain.UserRepository {
+	return &userRepositoryPG{
 		db: db,
 	}
 }
 
-func (u *userRepositoryMySQL) Create(user domain.User) error {
+func (u *userRepositoryPG) Create(user domain.User) error {
 	result := u.db.Create(user)
 	if result.Error != nil {
 		return errors.New("unexpected error while creating user")
@@ -24,7 +24,7 @@ func (u *userRepositoryMySQL) Create(user domain.User) error {
 	return nil
 }
 
-func (u *userRepositoryMySQL) Read(email string) (domain.User, error) {
+func (u *userRepositoryPG) Read(email string) (domain.User, error) {
 	var user domain.User
 	result := u.db.First(&user, "email = ?", email)
 	if result.Error != nil {
@@ -33,12 +33,12 @@ func (u *userRepositoryMySQL) Read(email string) (domain.User, error) {
 	return user, nil
 }
 
-func (u *userRepositoryMySQL) Update(user domain.User) error {
+func (u *userRepositoryPG) Update(user domain.User) error {
 	u.db.Save(&user)
 	return nil
 }
 
-func (u *userRepositoryMySQL) Delete(email string) error {
+func (u *userRepositoryPG) Delete(email string) error {
 	result := u.db.Delete(&domain.User{}, email)
 	if result.Error != nil {
 		return errors.New("unexpected error while deleting user")

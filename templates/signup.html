@@ -2,20 +2,20 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Document</title>
+    <title>World Lettering</title>
 </head>
 <body>
 {{if .}}
     <p>{{.}}</p>
 {{end}}
-<h1>新規アカウント作成</h1>
+<h1>New Account Creation</h1>
 <form action="/register" method="post">
-    <label>Eメール</label>
+    <label>Email</label>
     <input type="email" name="email" />
-    <label>パスワード</label>
+    <label>Passcode</label>
     <input type="password" name="password"/>
     <input type="submit" />
 </form>
-<a href="/">既にアカウントを持っている</a>
+<a href="/">I already have an account</a>
 </body>
 </html>

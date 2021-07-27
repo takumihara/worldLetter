@@ -46,7 +46,7 @@ func (l *letterRepositoryPG) Delete(id string) error {
 	return nil
 }
 
-func (l *letterRepositoryPG) ShowUnsendRandomLetter(AuthorID string) (domain.Letter, error) {
+func (l *letterRepositoryPG) GetFirstUnsendLetter(AuthorID string) (domain.Letter, error) {
 	var letter domain.Letter
 	l.db.Find(&letter, "is_sent = ? AND author_id != ?", false, AuthorID)
 	return letter, nil
