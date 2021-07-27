@@ -46,8 +46,22 @@ func (l *letterRepositoryPG) Delete(id string) error {
 	return nil
 }
 
-func (l *letterRepositoryPG) GetFirstUnsendLetter(AuthorID string) (domain.Letter, error) {
+func (l *letterRepositoryPG) GetFirstUnsendLetter(authorID string) (domain.Letter, error) {
 	var letter domain.Letter
-	l.db.Find(&letter, "is_sent = ? AND author_id != ?", false, AuthorID)
+	l.db.Find(&letter, "is_sent = ? AND author_id != ?", false, authorID)
 	return letter, nil
+}
+
+func (l *letterRepositoryPG) GetLettersByAuthorID(authorID string) (string, error) {
+	var str string
+	var letter domain.Letter
+	l.db.Find(&letter, "is_sent = ? AND author_id != ?", false, authorID)
+	return str, nil
+}
+
+func (l *letterRepositoryPG) GetLettersByReceiverID(receiverID string) (string, error) {
+	var str string
+	var letter domain.Letter
+	l.db.Find(&letter, "is_sent = ? AND receiver_id != ?", false, receiverID)
+	return str, nil
 }

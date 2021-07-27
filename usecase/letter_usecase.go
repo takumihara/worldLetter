@@ -51,3 +51,11 @@ func (u *letterUsecase) GetFirstUnsendLetter(authorID string) (domain.Letter, er
 	}
 	return letter, nil
 }
+
+func (u *letterUsecase) GetLettersByAuthorID(authorID string) (string, error) {
+	return u.letterRepo.GetLettersByAuthorID(authorID)
+}
+
+func (u *letterUsecase) GetLettersByReceiverID(receiverID string) (string, error) {
+	return u.letterRepo.GetLettersByAuthorID(receiverID)
+}

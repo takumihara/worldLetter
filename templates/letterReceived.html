@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Document</title>
+</head>
+<body>
+<h3>Letters you have received in the past.</h3>
+<div>
+    {{range $index, $content := .}}
+        <div style="position:relative; max-width: 500px; background-color: #fff; display: block; margin: 15px auto 0 auto; box-shadow: 0 6px 15px rgba(0, 0, 0, 0.16); padding: 60px 0; color: #2c2c2c;">
+            {{$content}}
+        </div>
+    {{end}}
+</div>
+</body>
+</html>

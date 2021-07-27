@@ -10,6 +10,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"strings"
 )
 
 type handler struct {
@@ -73,7 +74,7 @@ func (h *handler) jwtAuth(hf http.HandlerFunc) http.HandlerFunc {
 	}
 }
 
-func (h *handler) indexHandler(w http.ResponseWriter, r *http.Request) {
+func (h *handler) indexHandler(w http.ResponseWriter, _ *http.Request) {
 	err := tpl.ExecuteTemplate(w, "index.html", nil)
 	if err != nil {
 		log.Println(err)
@@ -194,7 +195,7 @@ func (h *handler) loginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (h *handler) createHandler(w http.ResponseWriter, r *http.Request) {
+func (h *handler) createHandler(w http.ResponseWriter, _ *http.Request) {
 	err := tpl.ExecuteTemplate(w, "create.html", nil)
 	if err != nil {
 		log.Println(err)
@@ -208,10 +209,10 @@ func (h *handler) sendHandler(w http.ResponseWriter, r *http.Request) {
 	encodedEmail := base64.StdEncoding.EncodeToString([]byte(email))
 
 	letter := domain.Letter{
-		ID:      id,
+		ID:       id,
 		AuthorID: encodedEmail,
-		Content: content,
-		IsSent:  false,
+		Content:  content,
+		IsSent:   false,
 	}
 
 	err := h.letterUseCase.Create(letter)
@@ -222,7 +223,6 @@ func (h *handler) sendHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-
 	user, err := h.userUseCase.Read(encodedEmail)
 	if err != nil {
 		log.Println(err)
@@ -230,7 +230,7 @@ func (h *handler) sendHandler(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/?msg="+query, http.StatusSeeOther)
 		return
 	}
-	user.LetterIDs = user.LetterIDs + id
+
 	err = h.userUseCase.Update(user)
 	if err != nil {
 		log.Println(err)
@@ -249,9 +249,86 @@ func (h *handler) showHandler(w http.ResponseWriter, r *http.Request) {
 	letter, err := h.letterUseCase.GetFirstUnsendLetter(encodedEmail)
 	if err != nil || letter.Content == "" {
 		log.Println(err)
-		letter.Content = "sorry, letter was not retrieved"
+		letter.Content = "sorry, letter was not retrieved. Your letter might be out first one!"
+	} else {
+		letter.IsSent = true
+		letter.ReceiverID = encodedEmail
+		err := h.letterUseCase.Update(letter)
+		if err != nil {
+			log.Println(err)
+		}
 	}
+
 	err = tpl.ExecuteTemplate(w, "show.html", letter.Content)
+	if err != nil {
+		log.Println(err)
+	}
+}
+
+func (h *handler) letterSentHandler(w http.ResponseWriter, r *http.Request) {
+	email := context.Get(r, "email").(string)
+	encodedEmail := base64.StdEncoding.EncodeToString([]byte(email))
+
+	contents := make([]string, 0, 5)
+
+	letters, err := h.letterUseCase.GetLettersByAuthorID(encodedEmail)
+	if err != nil {
+		log.Println(err)
+	} else if letters == "" {
+		content := "I guess you haven't sent any letter yet."
+		contents = append(contents, content)
+	} else {
+		contents = strings.Split(letters, "|")
+		// because it includes space in the last slice
+		contents = contents[:len(contents)-1]
+
+		for i, v := range contents {
+			xb, err := base64.StdEncoding.DecodeString(v)
+			if err != nil {
+				log.Println(err)
+			} else {
+				contents[i] = string(xb)
+			}
+		}
+	}
+
+	err = tpl.ExecuteTemplate(w, "letterSent.html", contents)
+	if err != nil {
+		log.Println(err)
+	}
+}
+
+func (h *handler) letterReceivedHandler(w http.ResponseWriter, r *http.Request) {
+	email := context.Get(r, "email").(string)
+	encodedEmail := base64.StdEncoding.EncodeToString([]byte(email))
+
+	contents := make([]string, 0, 5)
+
+	letters, err := h.letterUseCase.GetLettersByReceiverID(encodedEmail)
+	if err != nil {
+		log.Println(err)
+		msg := url.QueryEscape("sorry, internal server error")
+		http.Redirect(w, r, "/?"+msg, http.StatusSeeOther)
+	}
+	if letters == "" {
+		content := "I guess you haven't received any letter yet."
+		contents = append(contents, content)
+	} else {
+		contents = strings.Split(letters, "|")
+		// because it includes space in the last slice
+		contents = contents[:len(contents)-1]
+
+		for i, v := range contents {
+			xb, err := base64.StdEncoding.DecodeString(v)
+			if err != nil {
+				log.Println(err)
+			} else {
+				contents[i] = string(xb)
+			}
+		}
+	}
+
+	err = tpl.ExecuteTemplate(w, "letterReceived.html", contents)
 	if err != nil {
 		log.Println(err)
 	}
