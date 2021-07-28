@@ -270,15 +270,12 @@ func (h *handler) letterSentHandler(w http.ResponseWriter, r *http.Request) {
 	email := context.Get(r, "email").(string)
 	encodedEmail := base64.StdEncoding.EncodeToString([]byte(email))
 
-	contents := make([]string, 0, 5)
+	var contents []string
 
 	letters, err := h.letterUseCase.GetLettersByAuthorID(encodedEmail)
 	if err != nil {
 		log.Println(err)
-	} else if letters == "" {
-		content := "I guess you haven't sent any letter yet."
-		contents = append(contents, content)
-	} else {
+	} else if letters != "" {
 		contents = strings.Split(letters, "|")
 		// because it includes space in the last slice
 		contents = contents[:len(contents)-1]
@@ -303,7 +300,7 @@ func (h *handler) letterReceivedHandler(w http.ResponseWriter, r *http.Request) 
 	email := context.Get(r, "email").(string)
 	encodedEmail := base64.StdEncoding.EncodeToString([]byte(email))
 
-	contents := make([]string, 0, 5)
+	var contents []string
 
 	letters, err := h.letterUseCase.GetLettersByReceiverID(encodedEmail)
 	if err != nil {
@@ -311,10 +308,7 @@ func (h *handler) letterReceivedHandler(w http.ResponseWriter, r *http.Request) 
 		msg := url.QueryEscape("sorry, internal server error")
 		http.Redirect(w, r, "/?"+msg, http.StatusSeeOther)
 	}
-	if letters == "" {
-		content := "I guess you haven't received any letter yet."
-		contents = append(contents, content)
-	} else {
+	if letters != "" {
 		contents = strings.Split(letters, "|")
 		// because it includes space in the last slice
 		contents = contents[:len(contents)-1]
