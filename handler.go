@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/base64"
+	"fmt"
 	"github.com/google/uuid"
 	"github.com/gorilla/context"
 	"github.com/tacomea/worldLetter/domain"
@@ -74,8 +75,9 @@ func (h *handler) jwtAuth(hf http.HandlerFunc) http.HandlerFunc {
 	}
 }
 
-func (h *handler) indexHandler(w http.ResponseWriter, _ *http.Request) {
-	err := tpl.ExecuteTemplate(w, "index.html", nil)
+func (h *handler) indexHandler(w http.ResponseWriter, r *http.Request) {
+	msg := r.FormValue("msg")
+	err := tpl.ExecuteTemplate(w, "index.html", msg)
 	if err != nil {
 		log.Println(err)
 	}
@@ -195,8 +197,9 @@ func (h *handler) loginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (h *handler) createHandler(w http.ResponseWriter, _ *http.Request) {
-	err := tpl.ExecuteTemplate(w, "create.html", nil)
+func (h *handler) createHandler(w http.ResponseWriter, r *http.Request) {
+	msg := r.FormValue("msg")
+	err := tpl.ExecuteTemplate(w, "create.html", msg)
 	if err != nil {
 		log.Println(err)
 	}
@@ -204,18 +207,25 @@ func (h *handler) createHandler(w http.ResponseWriter, _ *http.Request) {
 
 func (h *handler) sendHandler(w http.ResponseWriter, r *http.Request) {
 	content := r.FormValue("letter")
+	// there is actually no need to do this somehow
+	if content == "" {
+		msg := url.QueryEscape("you have to write something")
+		http.Redirect(w, r, "/create?msg="+msg, http.StatusSeeOther)
+		return
+	}
+
 	id := uuid.NewString()
 	email := context.Get(r, "email").(string)
 	encodedEmail := base64.StdEncoding.EncodeToString([]byte(email))
 
-	letter := domain.Letter{
+	newLetter := domain.Letter{
 		ID:       id,
 		AuthorID: encodedEmail,
 		Content:  content,
 		IsSent:   false,
 	}
 
-	err := h.letterUseCase.Create(letter)
+	err := h.letterUseCase.Create(newLetter)
 	if err != nil {
 		log.Println(err)
 		query := url.QueryEscape("sorry, internal server error")
@@ -223,44 +233,35 @@ func (h *handler) sendHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := h.userUseCase.Read(encodedEmail)
-	if err != nil {
-		log.Println(err)
-		query := url.QueryEscape("sorry, internal server error")
-		http.Redirect(w, r, "/?msg="+query, http.StatusSeeOther)
+	// check opt out
+	optout := r.FormValue("optout")
+	fmt.Println(optout)
+	if optout == "on" {
+		msg := url.QueryEscape("Thank you for sending a letter")
+		http.Redirect(w, r, "/?msg"+msg, http.StatusSeeOther)
 		return
 	}
 
-	err = h.userUseCase.Update(user)
+	retrievedLetter, err := h.letterUseCase.GetFirstUnsendLetter(encodedEmail)
 	if err != nil {
 		log.Println(err)
-		query := url.QueryEscape("sorry, internal server error")
-		http.Redirect(w, r, "/?msg="+query, http.StatusSeeOther)
-		return
-	}
-
-	http.Redirect(w, r, "/show", http.StatusSeeOther)
-}
-
-func (h *handler) showHandler(w http.ResponseWriter, r *http.Request) {
-	email := context.Get(r, "email").(string)
-	encodedEmail := base64.StdEncoding.EncodeToString([]byte(email))
-
-	letter, err := h.letterUseCase.GetFirstUnsendLetter(encodedEmail)
-	if err != nil {
-		log.Println(err)
-	} else if letter.Content == "" {
-		letter.Content = "sorry, letter was not retrieved. Your letter might be out first one!"
-	} else {
-		letter.IsSent = true
-		letter.ReceiverID = encodedEmail
-		err := h.letterUseCase.Update(letter)
+		msg := "sorry, internal server error"
+		http.Redirect(w, r, "/?msg="+msg, http.StatusSeeOther)
+	} else if retrievedLetter.Content == "" {
+		err = tpl.ExecuteTemplate(w, "send.html", nil)
 		if err != nil {
 			log.Println(err)
 		}
+		return
+	}
+	retrievedLetter.IsSent = true
+	retrievedLetter.ReceiverID = encodedEmail
+	err = h.letterUseCase.Update(retrievedLetter)
+	if err != nil {
+		log.Println(err)
 	}
 
-	err = tpl.ExecuteTemplate(w, "show.html", letter.Content)
+	err = tpl.ExecuteTemplate(w, "send.html", retrievedLetter.Content)
 	if err != nil {
 		log.Println(err)
 	}

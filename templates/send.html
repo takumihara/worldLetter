@@ -2,16 +2,22 @@
 <html lang="en" xmlns="http://www.w3.org/1999/html">
 <head>
     <meta charset="utf-8">
-    <title>Document</title>
+    <title>World Lettering</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0">
 </head>
 <body>
+<p>Letter was successfully created! Thank you.</p>
+{{if .}}
 <p>
-    Letter was successfully created! Thank you.</br><br>
-    Here is a reply from someone from somewhere in this world.
+</br><br>
+Here is a reply from someone from somewhere in this world.
 </p>
 <div style="position:relative; max-width: 500px; background-color: #fff; display: block; margin: 15px auto 0 auto; box-shadow: 0 6px 15px rgba(0, 0, 0, 0.16); padding: 60px 0; color: #2c2c2c;">
     {{ . }}
 </div>
+{{else}}
+<p>sorry, letter was not retrieved. Your letter might be out first one!</p>
+{{end}}
 <div>
     <a href="/">Go back to home!</a>
 </div>

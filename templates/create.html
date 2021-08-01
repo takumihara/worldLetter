@@ -3,8 +3,12 @@
 <head>
     <meta charset="utf-8">
     <title>Document</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0">
 </head>
 <body>
+{{if .}}
+<p>{{.}}</p>
+{{end}}
 <p>Write a letter for someone in somewhere in the world. English is preferable</p>
 <p>RULE</p>
 <ul>
@@ -18,7 +22,13 @@
     <li>What is it something that is unique to people from your country?</li>
 </ul>
 <form action="/send" method="post">
+    <div>
         <textarea id="letter" name="letter" required placeholder="Write here!" cols="75" rows="25"></textarea>
+    </div>
+    <div>
+        <label for="optout">I don't want to receive a letter</label>
+        <input type="checkbox" name="optout" id="optout">
+    </div>
         <input type="submit" value="SEND">
     </form>
 </body>

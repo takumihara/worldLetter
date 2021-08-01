@@ -2,6 +2,7 @@ package token
 
 import (
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
@@ -26,7 +27,7 @@ func CreateToken(sessionId string) (string, error) {
 		},
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	sig, err := token.SignedString([]byte("this is the key"))
+	sig, err := token.SignedString([]byte(os.Getenv("KEY")))
 	if err != nil {
 		return "", fmt.Errorf("error in SignedString: %w", err)
 	}
@@ -55,7 +56,7 @@ func ParseToken(signature string) (string, error) {
 		if token.Method.Alg() != jwt.SigningMethodHS256.Alg() {
 			return nil, fmt.Errorf("encoding method modified")
 		}
-		return []byte("this is the key"), nil
+		return []byte(os.Getenv("KEY")), nil
 	})
 	if err != nil {
 		return "", fmt.Errorf("error in parsewithclaims: %w", err)
