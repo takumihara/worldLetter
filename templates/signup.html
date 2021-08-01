@@ -11,10 +11,14 @@
 {{end}}
 <h1>New Account Creation</h1>
 <form action="/register" method="post">
-    <label>Email</label>
-    <input type="email" name="email" />
-    <label>Passcode</label>
-    <input type="password" name="password"/>
+    <div>
+        <label>Email</label>
+        <input type="email" name="email" />
+    </div>
+    <div>
+        <label>Passcode</label>
+        <input type="password" name="password"/>
+    </div>
     <input type="submit" />
 </form>
 <a href="/signin">I already have an account</a>

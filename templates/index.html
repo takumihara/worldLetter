@@ -9,21 +9,21 @@
 {{if .}}
 <p>{{.}}</p>
 {{end}}
+<div>
+    <h3>What is this?</h3>
+    <p>This is service in which you can communicate with someone unknown from somewhere in this world. By writing one letter, you can receive one letter in return.</p>
+</div>
 <form action="/logout" method="POST">
-    <input type="submit" value="logout">
+    <input type="submit" value="Logout">
 </form>
 <form action="/create" method="GET">
     <input type="submit" value="Write and Receive a Letter">
 </form>
 <form action="/letter/received" method="GET">
-    <input type="submit" value="Check the letters you have received">
+    <input type="submit" value="Check Letters You Have Received">
 </form>
 <form action="/letter/sent" method="GET">
-    <input type="submit" value="Check the letters you have sent">
+    <input type="submit" value="Check Letters You Have Sent">
 </form>
-<div>
-    <h3>Description</h3>
-    <p>This is service where you can communicate with someone unknown from somewhere is this world. By writing one letter, you can receive one leter in return.</p>
-</div>
 </body>
 </html>
