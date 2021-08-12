@@ -1,3 +1,3 @@
 # worldLetter
 
-deployed here. [https://world-letter.herokuapp.com/]
+deployed here. https://world-letter.herokuapp.com/
