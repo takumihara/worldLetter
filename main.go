@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/gorilla/mux"
+	"github.com/tacomea/worldLetter/database"
 	"github.com/tacomea/worldLetter/repository"
 	"github.com/tacomea/worldLetter/usecase"
 	"html/template"
@@ -19,15 +20,15 @@ func init() {
 
 func main() {
 	// Postgres
-	//db := database.NewPostgresDB()
-	//ur := repository.NewUserRepositoryPG(db)
-	//sr := repository.NewSessionRepositoryPG(db)
-	//lr := repository.NewLetterRepositoryPG(db)
+	db := database.NewPostgresDB()
+	ur := repository.NewUserRepositoryPG(db)
+	sr := repository.NewSessionRepositoryPG(db)
+	lr := repository.NewLetterRepositoryPG(db)
 
 	// sync.Map
-	ur := repository.NewSyncMapUserRepository()
-	sr := repository.NewSyncMapSessionRepository()
-	lr := repository.NewSyncMapLetterRepository()
+	//ur := repository.NewSyncMapUserRepository()
+	//sr := repository.NewSyncMapSessionRepository()
+	//lr := repository.NewSyncMapLetterRepository()
 
 	uu := usecase.NewUserUsecase(ur)
 	su := usecase.NewSessionUsecase(sr)
