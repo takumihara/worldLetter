@@ -15,7 +15,7 @@ func NewPostgresDB() *gorm.DB {
 	url := getDatabaseUrl()
 	//max := getMaxConnection()
 
-	sqlDB, err := sql.Open("postgres", url)
+	sqlDB, err :=sql.Open("postgres", url)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -40,9 +40,14 @@ func NewPostgresDB() *gorm.DB {
 func getDatabaseUrl() string {
 	url := os.Getenv("DATABASE_URL")
 	if url == "" {
+		pgUser := os.Getenv("POSTGRES_USER")
+		pgPass := os.Getenv("POSTGRES_PASSWORD")
+		pgHost := "postgresql"
+		pgPort := "5432"
+		pgDB := os.Getenv("POSTGRES_DB")
 		//panic("Environment variable 'DATABASE_URL' not defined")
-		url = fmt.Sprintf("postgres://pg-user:password@localhost:5433/world-letter?sslmode=disable")
-		log.Println("since environment variable 'DATABASE_URL' not defined, we'll run postgres locally")
+		url = fmt.Sprintf("postgres://%v:%v@%v:%v/%v?sslmode=disable", pgUser, pgPass, pgHost, pgPort, pgDB)
+		//log.Println("environment variable 'DATABASE_URL' not defined: ", url)
 		//url = "user=pg-user dbname=world-letter password=password sslmode=disable port=5433 host=localhost"
 	}
 

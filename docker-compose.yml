@@ -4,7 +4,42 @@ services:
     build: .
     ports:
       - 8080:8080
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: world-letter
     volumes:
       - .:/app
     command: >
       sh -c "reflex -s -r '\.go$$' go run main.go handler.go"
+    depends_on:
+      - postgres
+
+  postgresql:
+    image: postgres:latest
+    container_name: postgresql
+    ports:
+      - 5432:5432
+#    volumes:
+#      - ./postgres/init:/docker-entrypoint-initdb.d
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: password
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8"
+      POSTGRES_DB: world-letter
+#    hostname: postgres
+#    restart: always
+#    user: root
+
+  pgadmin4:
+    image: dpage/pgadmin4
+    container_name: pgadmin4
+    ports:
+      - 80:80
+    environment:
+      PGADMIN_DEFAULT_EMAIL: test@test.com
+      PGADMIN_DEFAULT_PASSWORD: password
+#    hostname: pgadmin4
+    restart: always
+    depends_on:
+      - postgres
