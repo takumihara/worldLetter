@@ -3,7 +3,7 @@ package main
 import (
 	"github.com/gorilla/mux"
 	"github.com/tacomea/worldLetter/database"
-	"github.com/tacomea/worldLetter/repository"
+	"github.com/tacomea/worldLetter/domain/repository"
 	"github.com/tacomea/worldLetter/usecase"
 	"html/template"
 	"log"

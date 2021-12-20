@@ -10,7 +10,7 @@ type letterRepositoryPG struct {
 	db *gorm.DB
 }
 
-func NewLetterRepositoryPG(db *gorm.DB) domain.LetterRepository {
+func NewLetterRepositoryPG(db *gorm.DB) LetterRepository {
 	return &letterRepositoryPG{
 		db: db,
 	}

@@ -1,12 +1,26 @@
 package usecase
 
-import "github.com/tacomea/worldLetter/domain"
+import (
+	"github.com/tacomea/worldLetter/domain"
+	"github.com/tacomea/worldLetter/domain/repository"
+)
 
-type letterUsecase struct {
-	letterRepo domain.LetterRepository
+type LetterUseCase interface {
+	Create(letter domain.Letter) error
+	Read(id string) (domain.Letter, error)
+	Update(letter domain.Letter) error
+	Delete(id string) error
+	GetAll() ([]domain.Letter, error)
+	GetFirstUnsendLetter(authorID string) (domain.Letter, error)
+	GetLettersByAuthorID(authorID string) (string, error)
+	GetLettersByReceiverID(receiverID string) (string, error)
 }
 
-func NewLetterUsecase(lr domain.LetterRepository) domain.LetterUseCase {
+type letterUsecase struct {
+	letterRepo repository.LetterRepository
+}
+
+func NewLetterUsecase(lr repository.LetterRepository) LetterUseCase {
 	return &letterUsecase{
 		letterRepo: lr,
 	}

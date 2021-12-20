@@ -10,7 +10,7 @@ type sessionRepositoryPG struct {
 	db *gorm.DB
 }
 
-func NewSessionRepositoryPG(db *gorm.DB) domain.SessionRepository{
+func NewSessionRepositoryPG(db *gorm.DB) SessionRepository {
 	return &sessionRepositoryPG{
 		db: db,
 	}
@@ -40,5 +40,3 @@ func (s *sessionRepositoryPG) Read(id string) (domain.Session, error) {
 	}
 	return session, nil
 }
-
-
