@@ -10,7 +10,7 @@ type userRepository struct {
 	m sync.Map
 }
 
-func NewSyncMapUserRepository() UserRepository {
+func NewSyncMapUserRepository() domain.UserRepository {
 	return &userRepository{}
 }
 

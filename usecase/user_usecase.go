@@ -1,40 +1,45 @@
 package usecase
 
-import (
-	"github.com/tacomea/worldLetter/domain"
-	"github.com/tacomea/worldLetter/domain/repository"
-)
-
-type UserUseCase interface {
-	Create(user domain.User) error
-	Read(email string) (domain.User, error)
-	Update(user domain.User) error
-	Delete(email string) error
-}
-
+import "github.com/tacomea/worldLetter/domain"
 
 type userUsecase struct {
-	userRepo repository.UserRepository
+	userRepo domain.UserRepository
 }
 
-func NewUserUsecase(ur repository.UserRepository) UserUseCase {
+func NewUserUsecase(ur domain.UserRepository) domain.UserUseCase {
 	return &userUsecase{
 		userRepo: ur,
 	}
 }
 
 func (u *userUsecase) Create(user domain.User) error {
-	return u.userRepo.Create(user)
+	err := u.userRepo.Create(user)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (u *userUsecase) Read(email string) (domain.User, error) {
-	return u.userRepo.Read(email)
+	user, err := u.userRepo.Read(email)
+	if err != nil {
+		return domain.User{}, err
+	}
+	return user, nil
 }
 
 func (u *userUsecase) Update(user domain.User) error {
-	return u.userRepo.Update(user)
+	err := u.userRepo.Update(user)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (u *userUsecase) Delete(email string) error {
-	return u.userRepo.Delete(email)
+	err := u.userRepo.Delete(email)
+	if err != nil {
+		return err
+	}
+	return nil
 }

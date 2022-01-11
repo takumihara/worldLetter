@@ -7,7 +7,6 @@ import (
 	"github.com/gorilla/context"
 	"github.com/tacomea/worldLetter/domain"
 	"github.com/tacomea/worldLetter/token"
-	"github.com/tacomea/worldLetter/usecase"
 	"golang.org/x/crypto/bcrypt"
 	"log"
 	"net/http"
@@ -16,12 +15,12 @@ import (
 )
 
 type handler struct {
-	userUseCase    usecase.UserUseCase
-	sessionUseCase usecase.SessionUseCase
-	letterUseCase  usecase.LetterUseCase
+	userUseCase    domain.UserUseCase
+	sessionUseCase domain.SessionUseCase
+	letterUseCase  domain.LetterUseCase
 }
 
-func newHandler(uu usecase.UserUseCase, su usecase.SessionUseCase, lu usecase.LetterUseCase) *handler {
+func newHandler(uu domain.UserUseCase, su domain.SessionUseCase, lu domain.LetterUseCase) *handler {
 	return &handler{
 		userUseCase:    uu,
 		sessionUseCase: su,

@@ -11,7 +11,7 @@ type letterRepository struct {
 	m sync.Map
 }
 
-func NewSyncMapLetterRepository() LetterRepository {
+func NewSyncMapLetterRepository() domain.LetterRepository {
 	return &letterRepository{}
 }
 

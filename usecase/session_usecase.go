@@ -1,35 +1,37 @@
 package usecase
 
-import (
-	"github.com/tacomea/worldLetter/domain"
-	"github.com/tacomea/worldLetter/domain/repository"
-)
-
-type SessionUseCase interface {
-	Create(session domain.Session) error
-	Delete(id string) error
-	Read(id string) (domain.Session, error)
-}
-
+import "github.com/tacomea/worldLetter/domain"
 
 type sessionUsecase struct {
-	sessionRepo repository.SessionRepository
+	sessionRepo domain.SessionRepository
 }
 
-func NewSessionUsecase(sr repository.SessionRepository) SessionUseCase {
+func NewSessionUsecase(sr domain.SessionRepository) domain.SessionUseCase {
 	return &sessionUsecase{
 		sessionRepo: sr,
 	}
 }
 
 func (u *sessionUsecase) Create(session domain.Session) error {
-	return u.sessionRepo.Create(session)
+	err := u.sessionRepo.Create(session)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (u *sessionUsecase) Delete(id string) error {
-	return u.sessionRepo.Delete(id)
+	err := u.sessionRepo.Delete(id)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (u *sessionUsecase) Read(id string) (domain.Session, error) {
-	return u.sessionRepo.Read(id)
+	user, err := u.sessionRepo.Read(id)
+	if err != nil {
+		return domain.Session{}, err
+	}
+	return user, nil
 }

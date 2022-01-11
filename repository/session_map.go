@@ -10,7 +10,7 @@ type sessionRepository struct {
 	m sync.Map
 }
 
-func NewSyncMapSessionRepository() SessionRepository {
+func NewSyncMapSessionRepository() domain.SessionRepository {
 	return &sessionRepository{}
 }
 
