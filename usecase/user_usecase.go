@@ -13,33 +13,17 @@ func NewUserUsecase(ur domain.UserRepository) domain.UserUseCase {
 }
 
 func (u *userUsecase) Create(user domain.User) error {
-	err := u.userRepo.Create(user)
-	if err != nil {
-		return err
-	}
-	return nil
+	return u.userRepo.Create(user)
 }
 
 func (u *userUsecase) Read(email string) (domain.User, error) {
-	user, err := u.userRepo.Read(email)
-	if err != nil {
-		return domain.User{}, err
-	}
-	return user, nil
+	return u.userRepo.Read(email)
 }
 
 func (u *userUsecase) Update(user domain.User) error {
-	err := u.userRepo.Update(user)
-	if err != nil {
-		return err
-	}
-	return nil
+	return u.userRepo.Update(user)
 }
 
 func (u *userUsecase) Delete(email string) error {
-	err := u.userRepo.Delete(email)
-	if err != nil {
-		return err
-	}
-	return nil
+	return u.userRepo.Delete(email)
 }

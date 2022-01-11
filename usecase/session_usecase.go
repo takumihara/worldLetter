@@ -13,25 +13,13 @@ func NewSessionUsecase(sr domain.SessionRepository) domain.SessionUseCase {
 }
 
 func (u *sessionUsecase) Create(session domain.Session) error {
-	err := u.sessionRepo.Create(session)
-	if err != nil {
-		return err
-	}
-	return nil
+	return u.sessionRepo.Create(session)
 }
 
 func (u *sessionUsecase) Delete(id string) error {
-	err := u.sessionRepo.Delete(id)
-	if err != nil {
-		return err
-	}
-	return nil
+	return u.sessionRepo.Delete(id)
 }
 
 func (u *sessionUsecase) Read(id string) (domain.Session, error) {
-	user, err := u.sessionRepo.Read(id)
-	if err != nil {
-		return domain.Session{}, err
-	}
-	return user, nil
+	return u.sessionRepo.Read(id)
 }
