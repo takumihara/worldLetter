@@ -2,6 +2,7 @@ package repository
 
 import (
 	"errors"
+	"fmt"
 	"github.com/tacomea/worldLetter/domain"
 	"gorm.io/gorm"
 )
@@ -19,7 +20,7 @@ func NewUserRepositoryPG(db *gorm.DB) domain.UserRepository {
 func (u *userRepositoryPG) Create(user domain.User) error {
 	result := u.db.Create(user)
 	if result.Error != nil {
-		return errors.New("unexpected error while creating user")
+		return errors.New(fmt.Sprintf("unexpected error while creating user: %s", result.Error))
 	}
 	return nil
 }
