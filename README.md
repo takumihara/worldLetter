@@ -20,7 +20,10 @@ Go 1.15
 
 - クリーンアーキテクチャを元にレイヤー分割を行った
 - Interfaceを使うことでインメモリ (`sync.Map`) とDBを環境変数で切り替えられるようにし、テストなどを容易に行えるようにした。
-
+```shell
+$ DB_DIALECT="postgres" go test ./repository
+$ DB_DIALECT="map" go test ./repository
+```
 ```go
 // domain/user.go
 
@@ -42,8 +45,6 @@ func (u *userRepositoryPG) Create(user domain.User) error {
 	}
 	return nil
 }
-
-// other methods
 ```
 
 ```go
@@ -57,8 +58,6 @@ func (u *userRepository) Create(user domain.User) error {
 	}
 	return nil
 }
-
-// other methods
 ```
 
 ## 環境構築の手順
