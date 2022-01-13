@@ -35,56 +35,74 @@ func TestCreate(t *testing.T) {
 	type args struct {
 		user domain.User
 	}
-	want := []domain.User{
-		{
-			Email:    "test@domain.com",
-			Password: []byte("password"),
-		},
+	//want := []domain.User{
+	//	{
+	//		Email:    "test@domain.com",
+	//		Password: []byte("password"),
+	//	},
+	//}
+
+	//tests := []struct {
+	//	name        string
+	//	mockClosure func(sqlmock2 sqlmock.Sqlmock)
+	//	args        args
+	//	want        []domain.User
+	//	assertion   assert.ErrorAssertionFunc
+	//}{
+	//	{
+	//		name: "Success",
+	//		mockClosure: func(mock sqlmock.Sqlmock) {
+	//			//mock.ExpectBegin()
+	//			//rows := sqlmock.NewRows([]string{"email", "password"}).AddRow(want[0].Email, want[0].Password)
+	//			//mock.ExpectExec(CreateQuery).WithArgs(want[0].Email, want[0].Password).WillReturnResult(sqlmock.NewResult(1, 1))
+	//			mock.ExpectQuery(CreateQuery).WithArgs(want[0].Email, want[0].Password)
+	//		},
+	//		args: args{
+	//			user: want[0],
+	//		},
+	//		want:      want,
+	//		assertion: assert.NoError,
+	//	},
+	//}
+	//
+	//t.Parallel()
+
+	//for _, tt := range tests {
+	//	t.Run(tt.name, func(t *testing.T) {
+	//		db, mock, err := getDBMock()
+	//		if err != nil {
+	//			log.Fatalln("failed to init db mock:", err)
+	//		}
+	//		tt.mockClosure(mock)
+	//		cr := &userRepositoryPG{db: db}
+	//
+	//		err = cr.Create(tt.args.user)
+	//		tt.assertion(t, err)
+	//
+	//		//mock.ExpectClose()
+	//		//if err = mock.ExpectationsWereMet(); err != nil {
+	//		//	t.Errorf("there were unfullfilled expectations: %s", err)
+	//		//}
+	//	})
+	//}
+
+	db, mock, err := getDBMock()
+	if err != nil {
+		log.Fatalln("failed to init db mock:", err)
 	}
-
-	tests := []struct {
-		name        string
-		mockClosure func(sqlmock2 sqlmock.Sqlmock)
-		args        args
-		want        []domain.User
-		assertion   assert.ErrorAssertionFunc
-	}{
-		{
-			name: "Success",
-			mockClosure: func(mock sqlmock.Sqlmock) {
-				//mock.ExpectBegin()
-				//rows := sqlmock.NewRows([]string{"email", "password"}).AddRow(want[0].Email, want[0].Password)
-				//mock.ExpectExec(CreateQuery).WithArgs(want[0].Email, want[0].Password).WillReturnResult(sqlmock.NewResult(1, 1))
-				mock.ExpectQuery(CreateQuery).WithArgs(want[0].Email, want[0].Password)
-			},
-			args: args{
-				user: want[0],
-			},
-			want:      want,
-			assertion: assert.NoError,
-		},
+	user := domain.User{
+		Email:    "test@domain.com",
+		Password: []byte("password"),
 	}
+	mock.ExpectBegin()
+	mock.ExpectQuery(CreateQuery).WithArgs(user.Email, user.Password)
+	mock.ExpectCommit()
 
-	t.Parallel()
+	cr := &userRepositoryPG{db: db}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			db, mock, err := getDBMock()
-			if err != nil {
-				log.Fatalln("failed to init db mock:", err)
-			}
-			tt.mockClosure(mock)
-			cr := &userRepositoryPG{db: db}
+	err = cr.Create(user)
+	assert.NoError(t, err)
 
-			err = cr.Create(tt.args.user)
-			tt.assertion(t, err)
-
-			//mock.ExpectClose()
-			//if err = mock.ExpectationsWereMet(); err != nil {
-			//	t.Errorf("there were unfullfilled expectations: %s", err)
-			//}
-		})
-	}
 }
 
 func TestRead(t *testing.T) {
