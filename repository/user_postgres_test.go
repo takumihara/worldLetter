@@ -19,15 +19,17 @@ func getDBMock() (*gorm.DB, sqlmock.Sqlmock, error) {
 
 	gdb, err := gorm.Open(postgres.New(postgres.Config{
 		Conn: sqlDB,
-	}), &gorm.Config{})
+	}), &gorm.Config{
+		SkipDefaultTransaction: true,
+	})
 	if err != nil {
 		return nil, nil, err
 	}
 	return gdb, mock, nil
 }
 
-const CreateQuery = `INSERT INTO "users" ("email","password") VALUES ($1,$2) RETURNING "users"."email"`
-//const CreateQuery = `INSERT INTO "users" ("email","password") VALUES ($1,$2)"`
+//const CreateQuery = `INSERT INTO "users" ("email","password") VALUES ($1,$2) RETURNING "users"."email"`
+const CreateQuery = `INSERT INTO "users" ("email","password") VALUES ($1,$2)`
 
 func TestCreate(t *testing.T) {
 	type args struct {
@@ -50,8 +52,10 @@ func TestCreate(t *testing.T) {
 		{
 			name: "Success",
 			mockClosure: func(mock sqlmock.Sqlmock) {
-				rows := sqlmock.NewRows([]string{"email", "password"}).AddRow(want[0].Email, want[0].Password)
-				mock.ExpectQuery(regexp.QuoteMeta(CreateQuery)).WithArgs(want[0].Email, want[0].Password).WillReturnRows(rows)
+				//mock.ExpectBegin()
+				//rows := sqlmock.NewRows([]string{"email", "password"}).AddRow(want[0].Email, want[0].Password)
+				//mock.ExpectExec(CreateQuery).WithArgs(want[0].Email, want[0].Password).WillReturnResult(sqlmock.NewResult(1, 1))
+				mock.ExpectQuery(CreateQuery).WithArgs(want[0].Email, want[0].Password)
 			},
 			args: args{
 				user: want[0],
@@ -75,10 +79,34 @@ func TestCreate(t *testing.T) {
 			err = cr.Create(tt.args.user)
 			tt.assertion(t, err)
 
-			mock.ExpectClose()
+			//mock.ExpectClose()
 			//if err = mock.ExpectationsWereMet(); err != nil {
 			//	t.Errorf("there were unfullfilled expectations: %s", err)
 			//}
 		})
+	}
+}
+
+func TestRead(t *testing.T) {
+	db, mock, err := getDBMock()
+	if err != nil {
+		t.Errorf("Failed to initialize mock DB: %v", err)
+		return
+	}
+
+	email := "test@domain.com"
+	password := []byte("password")
+	ur := &userRepositoryPG{db: db}
+	rows := sqlmock.NewRows([]string{"email", "password"}).AddRow(email, password)
+	mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM "users" WHERE email = $1 ORDER BY "users"."email" LIMIT 1`)).WithArgs(email).WillReturnRows(rows)
+
+	res, err := ur.Read("test@domain.com")
+
+	assert.Equal(t, err, nil)
+	assert.Equal(t, res.Email, email)
+	assert.Equal(t, res.Password, password)
+
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Errorf("Read: %v", err)
 	}
 }
