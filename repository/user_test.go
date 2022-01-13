@@ -1,40 +1,40 @@
 package repository
 
 import (
+	"errors"
 	"github.com/DATA-DOG/go-sqlmock"
-	"github.com/stretchr/testify/assert"
 	"github.com/tacomea/worldLetter/domain"
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
 	"log"
+	"os"
 	"regexp"
 	"testing"
 )
 
-func getDBMock() (*gorm.DB, sqlmock.Sqlmock, error) {
-	sqlDB, mock, err := sqlmock.New()
-	if err != nil {
-		return nil, nil, err
+func openTestConnectionUser() (domain.UserRepository, sqlmock.Sqlmock, error) {
+	switch os.Getenv("DB_DIALECT") {
+	case "postgres":
+		log.Println("testing postgres...")
+		gdb, mock, err := getDBMock()
+		if err != nil {
+			return nil, nil, err
+		}
+		return NewUserRepositoryPG(gdb), mock, nil
+	case "map":
+		log.Println("testing sync.Map...")
+		return NewSyncMapUserRepository(), nil, nil
+	default:
+		return nil, nil, errors.New("please set DB_DIALECT as an environment variable")
 	}
 
-	gdb, err := gorm.Open(postgres.New(postgres.Config{
-		Conn: sqlDB,
-	}), &gorm.Config{
-		SkipDefaultTransaction: true,
-	})
-	if err != nil {
-		return nil, nil, err
-	}
-	return gdb, mock, nil
 }
 
 //const CreateQuery = `INSERT INTO "users" ("email","password") VALUES ($1,$2) RETURNING "users"."email"`
 const CreateQuery = `INSERT INTO "users" ("email","password") VALUES ($1,$2)`
 
 func TestCreate(t *testing.T) {
-	type args struct {
-		user domain.User
-	}
+	//type args struct {
+	//	user domain.User
+	//}
 	//want := []domain.User{
 	//	{
 	//		Email:    "test@domain.com",
@@ -86,45 +86,56 @@ func TestCreate(t *testing.T) {
 	//	})
 	//}
 
-	db, mock, err := getDBMock()
+	ur, _, err := openTestConnectionUser()
 	if err != nil {
-		log.Fatalln("failed to init db mock:", err)
+		t.Fatalf("failed to init UserRepository: %v", err)
 	}
 	user := domain.User{
 		Email:    "test@domain.com",
 		Password: []byte("password"),
 	}
-	mock.ExpectBegin()
-	mock.ExpectQuery(CreateQuery).WithArgs(user.Email, user.Password)
-	mock.ExpectCommit()
 
-	cr := &userRepositoryPG{db: db}
-
-	err = cr.Create(user)
-	assert.NoError(t, err)
+	err = ur.Create(user)
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
 
 }
 
 func TestRead(t *testing.T) {
-	db, mock, err := getDBMock()
+	ur, mock, err := openTestConnectionUser()
 	if err != nil {
-		t.Errorf("Failed to initialize mock DB: %v", err)
-		return
+		t.Fatalf("failed to init UserRepository: %v", err)
 	}
 
 	email := "test@domain.com"
 	password := []byte("password")
-	ur := &userRepositoryPG{db: db}
 	rows := sqlmock.NewRows([]string{"email", "password"}).AddRow(email, password)
-	mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM "users" WHERE email = $1 ORDER BY "users"."email" LIMIT 1`)).WithArgs(email).WillReturnRows(rows)
+	if mock != nil {
+		mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM "users" WHERE email = $1 ORDER BY "users"."email" LIMIT 1`)).WithArgs(email).WillReturnRows(rows)
+	} else {
+		err = ur.Create(domain.User{Email: email, Password: password})
+		if err != nil {
+			t.Fatalf("Create: %v", err)
+		}
+	}
 
 	res, err := ur.Read("test@domain.com")
 
-	assert.Equal(t, err, nil)
-	assert.Equal(t, res.Email, email)
-	assert.Equal(t, res.Password, password)
-
-	if err := mock.ExpectationsWereMet(); err != nil {
+	if err != nil {
 		t.Errorf("Read: %v", err)
+	}
+	if res.Email != email {
+		t.Errorf("res.Email != email")
+	}
+	if string(res.Password) != string(password) {
+		t.Errorf("res.Password != password")
+	}
+
+	if mock != nil {
+		err = mock.ExpectationsWereMet()
+		if err != nil {
+			t.Errorf("Read: %v", err)
+		}
 	}
 }

@@ -3,7 +3,6 @@ package main
 import (
 	"github.com/gorilla/mux"
 	"github.com/tacomea/worldLetter/database"
-	"github.com/tacomea/worldLetter/domain"
 	"github.com/tacomea/worldLetter/repository"
 	"github.com/tacomea/worldLetter/usecase"
 	"html/template"
@@ -20,23 +19,10 @@ func init() {
 }
 
 func main() {
-	isMock := os.Getenv("is_mock")
-	var ur domain.UserRepository
-	var sr domain.SessionRepository
-	var lr domain.LetterRepository
-	if isMock == "True" {
-		// sync.Map
-		ur = repository.NewSyncMapUserRepository()
-		sr = repository.NewSyncMapSessionRepository()
-		lr = repository.NewSyncMapLetterRepository()
-	} else {
-		// Postgres
-		db := database.NewPostgresDB()
-		ur = repository.NewUserRepositoryPG(db)
-		sr = repository.NewSessionRepositoryPG(db)
-		lr = repository.NewLetterRepositoryPG(db)
-	}
-
+	db := database.NewPostgresDB()
+	ur := repository.NewUserRepositoryPG(db)
+	sr := repository.NewSessionRepositoryPG(db)
+	lr := repository.NewLetterRepositoryPG(db)
 
 	uu := usecase.NewUserUsecase(ur)
 	su := usecase.NewSessionUsecase(sr)
