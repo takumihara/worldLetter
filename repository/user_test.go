@@ -3,6 +3,7 @@ package repository
 import (
 	"errors"
 	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/stretchr/testify/assert"
 	"github.com/tacomea/worldLetter/domain"
 	"log"
 	"os"
@@ -32,74 +33,58 @@ func openTestConnectionUser() (domain.UserRepository, sqlmock.Sqlmock, error) {
 const CreateQuery = `INSERT INTO "users" ("email","password") VALUES ($1,$2)`
 
 func TestCreate(t *testing.T) {
-	//type args struct {
-	//	user domain.User
-	//}
-	//want := []domain.User{
-	//	{
-	//		Email:    "test@domain.com",
-	//		Password: []byte("password"),
-	//	},
-	//}
-
-	//tests := []struct {
-	//	name        string
-	//	mockClosure func(sqlmock2 sqlmock.Sqlmock)
-	//	args        args
-	//	want        []domain.User
-	//	assertion   assert.ErrorAssertionFunc
-	//}{
-	//	{
-	//		name: "Success",
-	//		mockClosure: func(mock sqlmock.Sqlmock) {
-	//			//mock.ExpectBegin()
-	//			//rows := sqlmock.NewRows([]string{"email", "password"}).AddRow(want[0].Email, want[0].Password)
-	//			//mock.ExpectExec(CreateQuery).WithArgs(want[0].Email, want[0].Password).WillReturnResult(sqlmock.NewResult(1, 1))
-	//			mock.ExpectQuery(CreateQuery).WithArgs(want[0].Email, want[0].Password)
-	//		},
-	//		args: args{
-	//			user: want[0],
-	//		},
-	//		want:      want,
-	//		assertion: assert.NoError,
-	//	},
-	//}
-	//
-	//t.Parallel()
-
-	//for _, tt := range tests {
-	//	t.Run(tt.name, func(t *testing.T) {
-	//		db, mock, err := getDBMock()
-	//		if err != nil {
-	//			log.Fatalln("failed to init db mock:", err)
-	//		}
-	//		tt.mockClosure(mock)
-	//		cr := &userRepositoryPG{db: db}
-	//
-	//		err = cr.Create(tt.args.user)
-	//		tt.assertion(t, err)
-	//
-	//		//mock.ExpectClose()
-	//		//if err = mock.ExpectationsWereMet(); err != nil {
-	//		//	t.Errorf("there were unfullfilled expectations: %s", err)
-	//		//}
-	//	})
-	//}
-
-	ur, _, err := openTestConnectionUser()
-	if err != nil {
-		t.Fatalf("failed to init UserRepository: %v", err)
+	type args struct {
+		user domain.User
 	}
-	user := domain.User{
-		Email:    "test@domain.com",
-		Password: []byte("password"),
+	want := []domain.User{
+		{
+			Email:    "test@domain.com",
+			Password: []byte("password"),
+		},
 	}
 
-	err = ur.Create(user)
-	if err != nil {
-		t.Fatalf("Create: %v", err)
+	tests := []struct {
+		name        string
+		mockClosure func(sqlmock2 sqlmock.Sqlmock)
+		args        args
+		want        []domain.User
+		assertion   assert.ErrorAssertionFunc
+	}{
+		{
+			name: "Success",
+			mockClosure: func(mock sqlmock.Sqlmock) {
+				mock.ExpectExec(regexp.QuoteMeta(CreateQuery)).WithArgs(want[0].Email, want[0].Password).WillReturnResult(sqlmock.NewResult(1, 1))
+			},
+			args: args{
+				user: want[0],
+			},
+			want:      want,
+			assertion: assert.NoError,
+		},
 	}
 
+	t.Parallel()
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ur, mock, err := openTestConnectionUser()
+			if err != nil {
+				t.Fatalf("failed to init UserRepository: %v", err)
+			}
+			if mock != nil {
+				tt.mockClosure(mock)
+			}
+
+			err = ur.Create(tt.args.user)
+			tt.assertion(t, err)
+
+			if mock != nil {
+				if err = mock.ExpectationsWereMet(); err != nil {
+					t.Errorf("there were unfullfilled expectations: %s", err)
+				}
+			}
+		})
+	}
 }
 
 func TestRead(t *testing.T) {
@@ -110,8 +95,8 @@ func TestRead(t *testing.T) {
 
 	email := "test@domain.com"
 	password := []byte("password")
-	rows := sqlmock.NewRows([]string{"email", "password"}).AddRow(email, password)
 	if mock != nil {
+		rows := sqlmock.NewRows([]string{"email", "password"}).AddRow(email, password)
 		mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM "users" WHERE email = $1 ORDER BY "users"."email" LIMIT 1`)).WithArgs(email).WillReturnRows(rows)
 	} else {
 		err = ur.Create(domain.User{Email: email, Password: password})
