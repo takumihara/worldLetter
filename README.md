@@ -71,10 +71,8 @@ docker compose up
 ## デモサイト
 
 こちらのサイトにデプロイされています。
-
-```
 https://world-letter.herokuapp.com/
-```
+
 
 下記テストアカウントを用いてログイン可能です！
 
